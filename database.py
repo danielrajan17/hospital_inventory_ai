@@ -169,3 +169,15 @@ def add_medicine(
             normalized_price,
         ))
         conn.commit()
+
+def dispense_medicine(batch_no, quantity_dispensed):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT stock_qty FROM inventory WHERE batch_no = ?", (batch_no,))
+    row = cursor.fetchone()
+    if row:
+        current_stock = row[0]
+        new_stock = max(0, current_stock - quantity_dispensed)
+        cursor.execute("UPDATE inventory SET stock_qty = ? WHERE batch_no = ?", (new_stock, batch_no))
+        conn.commit()
+    conn.close()
