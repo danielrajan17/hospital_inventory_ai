@@ -1,6 +1,5 @@
 """Hospital inventory web application and dashboard."""
 import streamlit as st
-import pandas as pd
 import plotly.graph_objects as go
 from database import init_db, fetch_inventory, fetch_usage_history, add_medicine
 from ai_engine import evaluate_expiry_and_stock, forecast_demand
@@ -16,14 +15,14 @@ st.subheader("AI-Powered Medicine & Hospital Inventory Management")
 raw_inv = fetch_inventory()
 df_inv = evaluate_expiry_and_stock(raw_inv)
 
-# Top KPI Row (Matching the 'Before vs After' & 4 Pillars)
+# Current inventory summary
 col1, col2, col3, col4 = st.columns(4)
 critical_shortages = len(df_inv[df_inv["stock_status"] == "⚠️ Critical Shortage"])
 expiring_alerts = len(df_inv[df_inv["days_to_expiry"] <= 30])
 excess_items = len(df_inv[df_inv["stock_status"] == "📦 Excess Stock"])
 
-col1.metric("📈 AI Forecast Accuracy", "90.32%", "+14.2% vs Manual")
-col2.metric("♻️ Waste Reduction", "18.0%", "Shelf-life optimized")
+col1.metric("📦 Inventory Batches", len(df_inv))
+col2.metric("📊 Excess Stock Batches", f"{excess_items} Batches", delta_color="inverse")
 col3.metric("⏰ Expiry Alerts (≤30d)", f"{expiring_alerts} Batches", delta_color="inverse")
 col4.metric("🔔 Critical Stock Shortages", f"{critical_shortages} Items", delta_color="inverse")
 
@@ -125,7 +124,22 @@ with tab4:
         exp_date = f2.date_input("Expiry Date")
 
         submitted = st.form_submit_button("Save Medicine Batch")
-        if submitted and med_name and batch_no:
-            add_medicine(med_name, category, batch_no, stock_qty, min_thresh, max_cap, exp_date, unit_price)
-            st.success(f"Added {med_name} ({batch_no}) to inventory! Refreshing...")
-            st.rerun()
+        if submitted:
+            try:
+                add_medicine(
+                    med_name,
+                    category,
+                    batch_no,
+                    stock_qty,
+                    min_thresh,
+                    max_cap,
+                    exp_date,
+                    unit_price,
+                )
+            except ValueError as error:
+                st.error(str(error))
+            else:
+                st.success(
+                    f"Added {med_name.strip()} ({batch_no.strip()}) to inventory! Refreshing..."
+                )
+                st.rerun()
