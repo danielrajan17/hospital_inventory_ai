@@ -32,8 +32,8 @@ total_inventory_value = df_inv["total_value"].sum()
 expired_value = df_inv[df_inv["expiry_status"] == "🔴 Expired"]["total_value"].sum()
 
 f_col1, f_col2 = st.columns(2)
-f_col1.metric("💰 Total Inventory Financial Value", f"${total_inventory_value:,.2f}")
-f_col2.metric("💸 Capital Tied in Expired Stock", f"${expired_value:,.2f}", delta_color="inverse")
+f_col1.metric("💰 Total Inventory Financial Value", f"₹{total_inventory_value:,.2f}")
+f_col2.metric("💸 Capital Tied in Expired Stock", f"₹{expired_value:,.2f}", delta_color="inverse")
 
 st.divider()
 
