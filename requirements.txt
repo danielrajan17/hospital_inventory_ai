@@ -1,0 +1,6 @@
+# Add project dependencies here.
+streamlit
+pandas
+numpy
+scikit-learn
+plotly
